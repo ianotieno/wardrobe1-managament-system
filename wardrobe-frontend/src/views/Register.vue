@@ -1,6 +1,5 @@
 <template>
     <div class="container mx-auto p-4">
-      
       <h1 class="text-2xl mb-4">Register</h1>
       <form @submit.prevent="register">
         <input v-model="form.name" type="text" placeholder="Name" class="border p-2 mb-2 w-full" />
@@ -8,6 +7,10 @@
         <input v-model="form.password" type="password" placeholder="Password" class="border p-2 mb-2 w-full" />
         <button type="submit" class="bg-blue-500 text-white p-2">Register</button>
       </form>
+      <p class="mt-10 text-center text-sm/6 text-gray-500">
+        Not a member?
+        <router-link :to="{ name: 'Login' }" class="font-semibold text-indigo-600 hover:text-indigo-500">Login to your Account</router-link>
+      </p>
     </div>
   </template>
   
