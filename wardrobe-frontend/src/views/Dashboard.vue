@@ -65,10 +65,10 @@ const fetchItems = async () => {
   try {
     console.log('Fetching items from /api/clothing-items...');
     const response = await api.get('/clothing-items');
-    console.log('Raw response:', response); // Log the full response object
-    console.log('Response data:', response.data); // Log just the data
-    items.value = response.data; // Assign the data
-    console.log('Items assigned:', items.value); // Confirm assignment
+    console.log('Raw response:', response);
+    console.log('Response data:', response.data);
+    items.value = response.data;
+    console.log('Items assigned:', items.value);
   } catch (error) {
     console.error('Fetch error:', {
       message: error.message,
@@ -105,7 +105,7 @@ const deleteItem = async (id) => {
 
 const editItem = (item) => {
   console.log('Editing item:', item);
-  newItem.value = { ...item, image: null }; // Reset image since it’s a file
+  newItem.value = { ...item, image: null };
   showForm.value = true;
 };
 

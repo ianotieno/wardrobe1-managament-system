@@ -1,5 +1,6 @@
 <template>
     <div class="container mx-auto p-4">
+      
       <h1 class="text-2xl mb-4">Register</h1>
       <form @submit.prevent="register">
         <input v-model="form.name" type="text" placeholder="Name" class="border p-2 mb-2 w-full" />

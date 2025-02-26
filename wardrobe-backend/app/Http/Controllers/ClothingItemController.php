@@ -9,8 +9,8 @@ class ClothingItemController extends Controller
 {
     public function index()
     {
-        return auth()->user()->clothingItems; // Assumes relationship is defined in User model
-    }
+        $items = auth()->user()->clothingItems; // Assumes relationship is defined
+        return response()->json($items);    }
 
     public function store(Request $request)
     {
