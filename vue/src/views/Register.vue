@@ -1,8 +1,8 @@
 <template>
     <div class="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
       <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img class="mx-auto h-10 w-auto" src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company" />
-        <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">Register for an account</h2>
+        <img class="mx-auto h-30 w-50 p-2.5" :src="wardrobe1" alt="Your Company" />
+        <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">Wordrobe Management System Registration</h2>
       </div>
   
       <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
@@ -50,7 +50,8 @@
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
   import api from '../api';
-  
+  import wardrobe1 from '../assets/wardrobe.jpg';
+
   const form = ref({ name: '', email: '', password: '' });
   const errors = ref({});
   const isLoading = ref(false);

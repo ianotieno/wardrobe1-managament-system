@@ -5,9 +5,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div class="flex h-16 items-center justify-between">
             <div class="flex items-center">
-              <div class="shrink-0">
-                <img class="size-8" src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Wardrobe Manager" />
-              </div>
+             
               <div class="hidden md:block">
                 <div class="ml-10 flex items-baseline space-x-4">
                   <a v-for="item in navigation" :key="item.name" :href="item.href" :class="[item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'rounded-md px-3 py-2 text-sm font-medium']" :aria-current="item.current ? 'page' : undefined">{{ item.name }}</a>
@@ -30,12 +28,25 @@
                     </MenuButton>
                   </div>
                   <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
-                    <MenuItems class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 ring-1 shadow-lg ring-black/5 focus:outline-hidden">
-                      <MenuItem v-for="item in userNavigation" :key="item.name" v-slot="{ active }">
-                        <a :href="item.href" :class="[active ? 'bg-gray-100 outline-hidden' : '', 'block px-4 py-2 text-sm text-gray-700']">{{ item.name }}</a>
-                      </MenuItem>
-                    </MenuItems>
-                  </transition>
+                  <MenuItems class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 ring-1 shadow-lg ring-black/5 focus:outline-hidden">
+                    <MenuItem v-for="item in userNavigation" :key="item.name" v-slot="{ active }">
+                      <a 
+                        v-if="item.name !== 'Sign out'"
+                        :href="item.href" 
+                        :class="[active ? 'bg-gray-100 outline-hidden' : '', 'block px-4 py-2 text-sm text-gray-700']"
+                      >
+                        {{ item.name }}
+                      </a>
+                      <button
+                        v-else
+                        @click="signOut"
+                        :class="[active ? 'bg-gray-100 outline-hidden' : '', 'block w-full text-left px-4 py-2 text-sm text-gray-700']"
+                      >
+                        {{ item.name }}
+                      </button>
+                    </MenuItem>
+                  </MenuItems>
+                </transition>
                 </Menu>
               </div>
             </div>
@@ -139,9 +150,18 @@
                 />
               </div>
               <div>
-                <label for="image" class="block text-sm/6 font-medium text-gray-900">Image</label>
-                <input type="file" @change="onFileChange" class="mt-2 block w-full text-gray-600" />
-              </div>
+        <label for="image" class="block text-sm/6 font-medium text-gray-900">Image</label>
+        <div class="mt-2">
+          <input 
+            type="file" 
+            ref="fileInput"
+            @change="onFileChange" 
+            accept="image/*"
+            class="block w-full text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+          />
+            </div>
+        
+      </div>
               <div class="flex gap-3">
                 <button
                   type="submit"
@@ -197,14 +217,18 @@
   import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
   import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline';
   import api from '../api';
-  
+  import { useRouter } from 'vue-router';
+  import wardrobe1 from '../assets/wardrobe.jpg';
+
+  const router = useRouter();
   const user = {
     name: 'Tom Cook',
     email: 'tom@example.com',
-    imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    imageUrl: 'https://static.vecteezy.com/system/resources/thumbnails/004/607/791/small_2x/man-face-emotive-icon-smiling-male-character-in-blue-shirt-flat-illustration-isolated-on-white-happy-human-psychological-portrait-positive-emotions-user-avatar-for-app-web-design-vector.jpg',
   };
   const navigation = [
     { name: 'Dashboard', href: '#', current: true },
+    { name: 'New Cloths', href: '#', },
   ];
   const userNavigation = [
     { name: 'Your Profile', href: '#' },
@@ -270,16 +294,22 @@
   const onFileChange = (e) => {
     newItem.value.image = e.target.files[0];
   };
-  const logout = async () => {
-    try {
-        await api.post('/logout'); // Assuming Sanctum's default logout route
-        console.log('Logged out successfully');
-        // Optionally clear local state or redirect
-        items.value = [];
-        router.push('/login'); // Redirect to login page if using Vue Router
-    } catch (error) {
-        console.error('Logout error:', error.response?.data || error.message);
-    }
+  const signOut = async () => {
+  console.log('Sign out clicked');
+  try {
+    const token = localStorage.getItem('token');
+    console.log('Token before sign out:', token);
+    const response = await api.post('/logout');
+    console.log('API response:', response.data);
+    localStorage.removeItem('token');
+    console.log('Token removed');
+    items.value = [];
+    console.log('Items cleared');
+    router.push('/login');
+    console.log('Redirecting to /login');
+  } catch (error) {
+    console.error('Sign out error:', error.response?.data || error.message);
+  }
 };
   
   onMounted(() => {
