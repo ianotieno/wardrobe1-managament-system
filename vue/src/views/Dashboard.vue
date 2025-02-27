@@ -165,12 +165,7 @@
               :key="item.id"
               class="rounded-md bg-white p-4 shadow-sm hover:shadow-md transition duration-200"
             >
-              <img
-                v-if="item.image"
-                :src="`/storage/${item.image}`"
-                class="w-full h-48 object-cover rounded-md mb-3"
-              />
-              <h3 class="text-lg font-semibold text-gray-900">{{ item.name }}</h3>
+            <img v-if="item.image" :src="`http://localhost:8000/storage/${item.image}`" @error="console.log('Image failed to load:', item.image)" />  <h3 class="text-lg font-semibold text-gray-900">{{ item.name }}</h3>
               <p class="text-sm text-gray-500 capitalize">{{ item.category }}</p>
               <p class="text-gray-600 mt-1 truncate">{{ item.description }}</p>
               <div class="mt-3 flex gap-2">
@@ -232,21 +227,14 @@
   });
   
   const fetchItems = async () => {
-    try {
-      console.log('Fetching items from /api/clothing-items...');
-      const response = await api.get('/clothing-items');
-      console.log('Response data:', response.data);
-      items.value = Array.isArray(response.data) ? response.data : [];
-      console.log('Items assigned:', items.value);
-    } catch (error) {
-      console.error('Fetch error:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
-      items.value = [];
-    }
-  };
+  try {
+    const response = await api.get('/clothing-items');
+    console.log('API Response:', response.data);
+    items.value = Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    console.error('Fetch error:', error);
+  }
+};
   
   const addItem = async () => {
     try {
@@ -282,6 +270,17 @@
   const onFileChange = (e) => {
     newItem.value.image = e.target.files[0];
   };
+  const logout = async () => {
+    try {
+        await api.post('/logout'); // Assuming Sanctum's default logout route
+        console.log('Logged out successfully');
+        // Optionally clear local state or redirect
+        items.value = [];
+        router.push('/login'); // Redirect to login page if using Vue Router
+    } catch (error) {
+        console.error('Logout error:', error.response?.data || error.message);
+    }
+};
   
   onMounted(() => {
     fetchItems();

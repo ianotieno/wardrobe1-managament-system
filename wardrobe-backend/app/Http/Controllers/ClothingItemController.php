@@ -9,8 +9,17 @@ class ClothingItemController extends Controller
 {
     public function index()
     {
-        $items = auth()->user()->clothingItems; // Assumes relationship is defined
-        return response()->json($items);    }
+        $items = auth()->user()->clothingItems;
+        return response()->json($items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'category' => $item->category,
+                'description' => $item->description,
+                'image' => $item->image,
+            ];
+        }));
+    }
 
     public function store(Request $request)
     {
@@ -42,5 +51,9 @@ class ClothingItemController extends Controller
         $item->delete();
         return response()->json(null, 204);
     }
-    
+    public function logout(Request $request)
+{
+    $request->user()->tokens()->delete();
+    return response()->json(['message' => 'Logged out']);
+}
 }
