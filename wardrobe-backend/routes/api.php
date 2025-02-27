@@ -7,9 +7,14 @@ use App\Http\Controllers\ClothingItemController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', [AuthController::class, 'user']);
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::apiResource('clothing-items', ClothingItemController::class);
 
+
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/clothing-items', [ClothingItemController::class, 'index']);
+    Route::post('/clothing-items', [ClothingItemController::class, 'store']);
+    Route::post('/clothing-items/{id}', [ClothingItemController::class, 'update']); // Use POST
+    Route::delete('/clothing-items/{id}', [ClothingItemController::class, 'destroy']);
+    Route::post('/logout', [ClothingItemController::class, 'logout']);
 });

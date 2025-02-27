@@ -124,31 +124,33 @@
             <form @submit.prevent="addItem" class="space-y-6">
               <div>
                 <label for="name" class="block text-sm/6 font-medium text-gray-900">Name</label>
-                <input
-                  v-model="newItem.name"
-                  placeholder="Item Name"
-                  class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-              <div>
-                <label for="category" class="block text-sm/6 font-medium text-gray-900">Category</label>
-                <select
-                  v-model="newItem.category"
-                  class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                >
-                  <option value="tops">Tops</option>
-                  <option value="bottoms">Bottoms</option>
-                  <option value="shoes">Shoes</option>
-                </select>
-              </div>
-              <div>
-                <label for="description" class="block text-sm/6 font-medium text-gray-900">Description</label>
-                <input
-                  v-model="newItem.description"
-                  placeholder="Description"
-                  class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
+    <input
+      v-model="newItem.name"
+      placeholder="Item Name"
+      required
+      class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+    />
+  </div>
+  <div>
+    <label for="category" class="block text-sm/6 font-medium text-gray-900">Category</label>
+    <select
+      v-model="newItem.category"
+      required
+      class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+    >
+      <option value="tops">Tops</option>
+      <option value="bottoms">Bottoms</option>
+      <option value="shoes">Shoes</option>
+    </select>
+  </div>
+  <div>
+    <label for="description" class="block text-sm/6 font-medium text-gray-900">Description</label>
+    <input
+      v-model="newItem.description"
+      placeholder="Description"
+      class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+    />
+  </div>
               <div>
         <label for="image" class="block text-sm/6 font-medium text-gray-900">Image</label>
         <div class="mt-2">
@@ -185,9 +187,10 @@
               :key="item.id"
               class="rounded-md bg-white p-4 shadow-sm hover:shadow-md transition duration-200"
             >
-            <img v-if="item.image" :src="`http://localhost:8000/storage/${item.image}`" @error="console.log('Image failed to load:', item.image)" />  <h3 class="text-lg font-semibold text-gray-900">{{ item.name }}</h3>
-              <p class="text-sm text-gray-500 capitalize">{{ item.category }}</p>
-              <p class="text-gray-600 mt-1 truncate">{{ item.description }}</p>
+            <img v-if="item.image" :src="`http://localhost:8000/storage/${item.image}`" @error="console.log('Image failed to load:', item.image)" /> 
+             <h3 class="text-lg font-semibold text-gray-900">name : {{ item.name }}</h3>
+              <p class="text-sm text-gray-500 capitalize">Category: {{ item.category }}</p>
+              <p class="text-gray-600 mt-1 truncate">Description : {{ item.description }}</p>
               <div class="mt-3 flex gap-2">
                 <button
                   @click="editItem(item)"
@@ -218,7 +221,7 @@
   import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline';
   import api from '../api';
   import { useRouter } from 'vue-router';
-  import wardrobe1 from '../assets/wardrobe.jpg';
+ 
 
   const router = useRouter();
   const user = {
@@ -241,6 +244,8 @@
   const category = ref('');
   const showForm = ref(false);
   const newItem = ref({ name: '', category: '', description: '', image: null });
+  const isEditing = ref(false);
+  const fileInput = ref(null); // Add this near your other refs
   
   const filteredItems = computed(() => {
     return items.value.filter((item) => {
@@ -260,22 +265,49 @@
   }
 };
   
-  const addItem = async () => {
-    try {
-      const formData = new FormData();
-      Object.keys(newItem.value).forEach((key) => formData.append(key, newItem.value[key]));
-      const response = await api.post('/clothing-items', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      console.log('Added item:', response.data);
-      items.value.push(response.data);
-      newItem.value = { name: '', category: '', description: '', image: null };
-      showForm.value = false;
-    } catch (error) {
-      console.error('Error adding item:', error.response?.data || error.message);
+const addItem = async () => {
+  try {
+    const formData = new FormData();
+    formData.append('name', newItem.value.name);
+    formData.append('category', newItem.value.category);
+    formData.append('description', newItem.value.description || '');
+    if (newItem.value.image instanceof File) {
+      formData.append('image', newItem.value.image, newItem.value.image.name);
     }
-  };
-  
+
+    console.log('Payload being sent:');
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
+    let response;
+    if (isEditing.value) {
+      const url = `/clothing-items/${newItem.value.id}`;
+      console.log('Sending POST request to:', url);
+      response = await api.post(url, formData, { // Change to POST
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Accept': 'application/json',
+        },
+      });
+      console.log('Response status:', response.status);
+      console.log('Response data:', response.data);
+      const updatedIndex = items.value.findIndex(item => item.id === newItem.value.id);
+      if (updatedIndex !== -1) {
+        items.value[updatedIndex] = response.data;
+      } else {
+        console.warn('Item not found in items array');
+      }
+    } else {
+      response = await api.post('/clothing-items', formData);
+      items.value.push(response.data);
+    }
+    resetForm();
+  } catch (error) {
+    console.error('Error processing item:', error.response?.data || error.message);
+    console.error('Error status:', error.response?.status);
+  }
+};
   const deleteItem = async (id) => {
     try {
       await api.delete(`/clothing-items/${id}`);
@@ -286,10 +318,12 @@
   };
   
   const editItem = (item) => {
-    console.log('Editing item:', item);
-    newItem.value = { ...item, image: null };
-    showForm.value = true;
-  };
+  console.log('Editing item:', item);
+  newItem.value = { ...item, image: null }; // Reset image to null for file upload
+  console.log('newItem after assignment:', newItem.value); // Debug
+  isEditing.value = true;
+  showForm.value = true;
+};
   
   const onFileChange = (e) => {
     newItem.value.image = e.target.files[0];
@@ -309,6 +343,14 @@
     console.log('Redirecting to /login');
   } catch (error) {
     console.error('Sign out error:', error.response?.data || error.message);
+  }
+};
+const resetForm = () => {
+  newItem.value = { id: null, name: '', category: '', description: '', image: null };
+  isEditing.value = false;
+  showForm.value = false;
+  if (fileInput.value) {
+    fileInput.value.value = ''; // Reset the file input field
   }
 };
   
